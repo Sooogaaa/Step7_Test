@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
@@ -67,37 +68,69 @@ class Product extends Model
 
     //登録処理
     public function InsertProduct($request, $image_path) {
-        //リクエストデータを基に商品情報を登録する
-        return $this->create([
-            'company_id' => $request->company_id,
-            'product_name' => $request->product_name,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'comment' => $request->comment,
-            'img_path' => $image_path
-        ]);
+        DB::beginTransaction();
+
+        try{
+            //リクエストデータを基に商品情報を登録する
+            $result = $this->create([
+                'company_id' => $request->company_id,
+                'product_name' => $request->product_name,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'comment' => $request->comment,
+                'img_path' => $image_path
+            ]);
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back();
+        }
+
+        return $result;
     }
 
     //更新処理
     public function updateProduct($request, $id, $image_path) {
-        //更新対象のデータ取得
-        $update = Product::find($id);
+        DB::beginTransaction();
 
-        //リクエストデータを基に商品情報を更新する
-        $result = $update->fill([
-            'company_id' => $request->company_id,
-            'product_name' => $request->product_name,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'comment' => $request->comment,
-            'img_path' => $image_path
-        ])->save();
+        try{
+            //更新対象のデータ取得
+            $update = Product::find($id);
+
+            //リクエストデータを基に商品情報を更新する
+            $result = $update->fill([
+                'company_id' => $request->company_id,
+                'product_name' => $request->product_name,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'comment' => $request->comment,
+                'img_path' => $image_path
+            ])->save();
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back();
+        }
 
         return $result;
     }
 
     //削除処理
     public function deleteProductById($id) {
-        return $this->destroy($id);
+        DB::beginTransaction();
+
+        try{
+            $result = $this->destroy($id);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back();
+        }
+
+        return $result;
     }    
 }
