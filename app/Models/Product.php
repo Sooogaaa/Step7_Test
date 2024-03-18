@@ -82,13 +82,12 @@ class Product extends Model
             ]);
 
             DB::commit();
+            return $result;
 
         } catch (\Exception $e) {
             DB::rollback();
             return back();
-        }
-
-        return $result;
+        }        
     }
 
     //更新処理
@@ -110,13 +109,12 @@ class Product extends Model
             ])->save();
 
             DB::commit();
+            return $result;
 
         } catch (\Exception $e) {
             DB::rollback();
             return back();
-        }
-
-        return $result;
+        }        
     }
 
     //削除処理
@@ -126,11 +124,11 @@ class Product extends Model
         try{
             $result = $this->destroy($id);
             DB::commit();
+            return $result;
+
         } catch (\Exception $e) {
             DB::rollback();
             return back();
-        }
-
-        return $result;
+        }        
     }    
 }
