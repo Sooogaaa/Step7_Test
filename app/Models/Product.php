@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Kyslik\ColumnSortable\Sortable;
 
 class Product extends Model
 {
     use HasFactory;
+    use Sortable;
 
     // モデルに関連付けるテーブル
     protected $table = 'products';
@@ -29,20 +31,39 @@ class Product extends Model
         'updated_at'
     ];
 
+    //ソートに使用するカラムの指定
+    public $sortable = [
+        'id',
+        'product_name',
+        'price',
+		'stock'
+    ];
+
+    public $sortableAs = [
+        'company_name'
+    ];
+
     //Companiesモデルのデータを取得する
     public function company() {		
 	    return $this->belongsTo(Company::class);
 	}
 
     //一覧表示用のデータ取得
-    public function findAllProducts($request, $searchproduct, $searchcompany) {
-        $query = Company::query();
-
+    public function findAllProducts($request) {
         //テーブル結合
-        $query->join('products', function ($query) use ($request) {
-            $query->on('products.company_id', '=', 'companies.id');
-            });
+        $query = Product::sortable()
+            ->join('companies','company_id','=','companies.id')
+            ->select('products.*','companies.company_name as company_name');
+        
+        return $query->orderBy('id', 'desc')->paginate(5);
+    }
 
+    public function SearchProducts($request, $searchproduct, $searchcompany, $lowprice, $highprice, $lowstock, $highstock) {
+        //テーブル結合
+        $query = Product::sortable()
+            ->join('companies','company_id','=','companies.id')
+            ->select('products.*','companies.company_name as company_name');
+        
         //$searchproductが空ではない場合、検索処理を実行
         if (!empty($searchproduct)) {
             $query->where('product_name', 'LIKE', "%{$searchproduct}%");
@@ -52,8 +73,28 @@ class Product extends Model
         if (!empty($searchcompany)) {
             $query->where('company_name', 'LIKE', $searchcompany);
         }
+
+        //$lowpriceが空ではない場合、検索処理を実行
+        if (!empty($lowprice)) {
+            $query->where('price', '>=', $lowprice);
+        }
+
+        //$highpriceが空ではない場合、検索処理を実行
+        if (!empty($highprice)) {
+            $query->where('price', '<=', $highprice);
+        }
+
+        //$lowstockが空ではない場合、検索処理を実行
+        if (!empty($lowstock)) {
+            $query->where('stock', '>=', $lowstock);
+        }
+
+        //$highstockが空ではない場合、検索処理を実行
+        if (!empty($highstock)) {
+            $query->where('stock', '<=', $highstock);
+        }
         
-        return $query->orderBy('products.id', 'asc')->paginate(5);
+        return $query->orderBy('id', 'desc')->paginate(5);
     }
 
     //リクエストされたIDをもとにProductsテーブルのレコードを1件取得

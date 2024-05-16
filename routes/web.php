@@ -16,13 +16,13 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-
 //未ログイン時のアクセス制限処理
 Route::group(['middleware' => 'auth'], function() {
     //商品一覧画面へのルート
     Route::get('/product', [ProductController::class, 'product'])->name('product');
+
+    //商品一覧検索処理
+    Route::get('/search', [ProductController::class, 'search'])->name('search');
 
     //商品情報登録画面へのルート
     Route::get('/create', [ProductController::class, 'create'])->name('create');
@@ -40,5 +40,5 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/update/{id}', [ProductController::class, 'update'])->name('update');
 
     //商品情報削除処理
-    Route::post('/destroy{id}', [ProductController::class, 'destroy'])->name('destroy');
+    Route::post('/destroy/{id}', [ProductController::class, 'destroy'])->name('destroy');
 });

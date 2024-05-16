@@ -14,19 +14,28 @@ class ProductController extends Controller
     
     //商品一覧画面
     public function product(Request $request) {        
-        //検索フォームに入力された値を取得
-        $searchproduct = $request->input('searchproduct');
-        $searchcompany = $request->input('searchcompany');
-
         //メーカ名検索用プルダウンデータ取得
         $companies_list = $this->product->findAllCompanies();
         
         //一覧表示用データを取得
-        $items =$this->product->findAllProducts($request, $searchproduct, $searchcompany);        
-
-        return view('product', compact('items', 'searchproduct', 'searchcompany', 'companies_list'));        
+        $items =$this->product->findAllProducts($request);
+        return view('product', compact('items', 'companies_list'));
     }
-    
+
+    //商品一覧画面検索
+    public function search(Request $request) {        
+        //検索フォームに入力された値を取得
+        $searchproduct = $request->searchproduct;
+        $searchcompany = $request->searchcompany;
+        $lowprice = $request->lowprice;
+        $highprice = $request->highprice;
+        $lowstock = $request->lowstock;
+        $highstock = $request->highstock;
+                
+        $items =$this->product->SearchProducts($request, $searchproduct, $searchcompany, $lowprice, $highprice, $lowstock, $highstock);
+        return response()->json($items);
+    }
+
     //商品情報登録画面表示
     public function create(Request $request) {
         //メーカ名入力用プルダウンデータ取得
@@ -84,8 +93,8 @@ class ProductController extends Controller
     }
 
     //商品情報削除処理
-    public function destroy($id) {
+    public function destroy(Request $request) {
+        $id = $request->id;
         $deleteProduct = $this->product->deleteProductById($id);
-        return redirect()->route('product');
     }
 }
