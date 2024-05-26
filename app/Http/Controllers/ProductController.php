@@ -25,6 +25,8 @@ class ProductController extends Controller
     //商品一覧画面検索
     public function search(Request $request) {        
         //検索フォームに入力された値を取得
+        $sortfield = $request->get('sort', 'id');
+        $sortorder = $request->get('order', 'desc');
         $searchproduct = $request->searchproduct;
         $searchcompany = $request->searchcompany;
         $lowprice = $request->lowprice;
@@ -32,7 +34,7 @@ class ProductController extends Controller
         $lowstock = $request->lowstock;
         $highstock = $request->highstock;
                 
-        $items =$this->product->SearchProducts($request, $searchproduct, $searchcompany, $lowprice, $highprice, $lowstock, $highstock);
+        $items =$this->product->SearchProducts($request, $sortfield, $sortorder, $searchproduct, $searchcompany, $lowprice, $highprice, $lowstock, $highstock);
         return response()->json($items);
     }
 

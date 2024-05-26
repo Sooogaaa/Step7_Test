@@ -58,9 +58,9 @@ class Product extends Model
         return $query->orderBy('id', 'desc')->paginate(5);
     }
 
-    public function SearchProducts($request, $searchproduct, $searchcompany, $lowprice, $highprice, $lowstock, $highstock) {
+    public function SearchProducts($request, $sortfield, $sortorder, $searchproduct, $searchcompany, $lowprice, $highprice, $lowstock, $highstock) {
         //テーブル結合
-        $query = Product::sortable()
+        $query = Product::query()
             ->join('companies','company_id','=','companies.id')
             ->select('products.*','companies.company_name as company_name');
         
@@ -94,7 +94,7 @@ class Product extends Model
             $query->where('stock', '<=', $highstock);
         }
         
-        return $query->orderBy('id', 'desc')->paginate(5);
+        return $query->orderBy($sortfield, $sortorder)->paginate(5);
     }
 
     //リクエストされたIDをもとにProductsテーブルのレコードを1件取得

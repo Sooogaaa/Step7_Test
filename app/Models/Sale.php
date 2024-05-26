@@ -31,24 +31,13 @@ class Sale extends Model
 
     //登録処理
     public function InsertSale($product, $product_id, $quantity) {
-        DB::beginTransaction();
+        // 在庫を減少させる
+        $product->stock -= $quantity;
+        $product->save();
 
-        try{
-            // 在庫を減少させる
-            $product->stock -= $quantity;
-            $product->save();
-
-            //リクエストデータを基に商品購入情報を登録する
-            $result = $this->create([
-                'product_id' => $product_id
-            ]);
-
-            DB::commit(); 
-            return $result;                 
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back();
-        }        
+        //リクエストデータを基に商品購入情報を登録する
+        $result = $this->create([
+            'product_id' => $product_id
+        ]);
     }
 }
